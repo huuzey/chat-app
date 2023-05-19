@@ -7,7 +7,7 @@ import Register from "./pages/Register";
 import Chat from "./pages/Chat";
 import io from "socket.io-client";
 
-const socket = io.connect("http://localhost:4000");
+const socket = io.connect("https://chat-backend-sh8h.onrender.com");
 
 const Routers = () => {
   const [loading, setloading] = useState(true);
