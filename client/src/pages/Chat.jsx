@@ -6,11 +6,9 @@ import Logo from "../assets/logo.svg";
 import Welcome from "../components/Welcome";
 import ChatContainer from "../components/ChatContainer";
 import InpuutChat from "../components/InpuutChat";
-import { io } from "socket.io-client";
-import { baseurl } from "../App";
+import { v4 as uuidv4 } from "uuid";
 
-const Chat = () => {
-  const socket = useRef();
+const Chat = ({ socket }) => {
   const scrollref = useRef();
   const { id, nameuser } = useSelector((store) => store.global);
   const [contacts, setContacts] = useState([]);
@@ -37,6 +35,7 @@ const Chat = () => {
             to: currentid,
           });
           setchat(data);
+          console.log("data", data);
         } catch (error) {
           console.log(error);
         }
@@ -44,20 +43,23 @@ const Chat = () => {
       huu();
     }
   }, [currentid]);
-  const handleSend = async (mss, setmessege) => {
+  const handleSend = async (mss, setmessege, u) => {
+    console.log(u);
     try {
       const { data } = await axios.post("/user/message/addmsg", {
         from: id,
         to: currentid,
         message: mss,
+        times: u,
       });
-      socket.current.emit("send-msg", {
+      socket.emit("send-msg", {
         to: currentid,
         from: id,
         message: mss,
+        times: u,
       });
       const msgs = [...chat];
-      msgs.push({ fromSelf: true, message: mss });
+      msgs.push({ fromSelf: true, message: mss, times: u });
       setchat(msgs);
       setmessege("");
     } catch (error) {
@@ -65,39 +67,21 @@ const Chat = () => {
     }
   };
   useEffect(() => {
-    if (socket.current) {
-      socket.current.on("msg-recieve", (msg) => {
-        console.log(msg);
-        setarrivalmsg({ from: false, message: msg });
-      });
-    }
-  }, []);
-  useEffect(() => {
-    arrivalmsg && setchat((prev) => [...prev, arrivalmsg]);
-  }, [arrivalmsg]);
-  useEffect(() => {
     scrollref.current?.scrollIntoView({ behaviour: "smooth" });
   }, [chat]);
 
   useEffect(() => {
     fetch();
   }, []);
-  useEffect(() => {
-    if (id) {
-      socket.current = io(baseurl);
-      socket.current.emit("add-user", id);
-    }
-  }, [id]);
-
   const authe = nameuser.charAt(0).toUpperCase() + nameuser.slice(1);
   return (
-    <div className="flex h-screen bg-[#131324]">
-      <div className="flex w-1/3 shadow-2xl shadow-[#71315C] flex-col bg-[#71315C]">
+    <div className="flex h-full  bg-[#131324]">
+      <div className=" w-1/3 fixed  top-0 left-0 h-full overflow-y-scroll shadow-2xl shadow-[#71315C]  bg-[#71315C]">
         <div className="font-bold text-3xl ml-3 mt-3 text-teal-300 flex items-center ">
           <img src={Logo} alt="logo" className=" mr-2 h-12 w-12" />
           {authe}
         </div>
-        <div className=" overflow-x-hidden    text-[#1cd5dcd6] ml-3 mt-3 flex flex-col ">
+        <div className="    text-[#1cd5dcd6] ml-3 mt-3 flex flex-col ">
           {contacts?.map((contact) => {
             return (
               <Contact
@@ -111,16 +95,23 @@ const Chat = () => {
           })}
         </div>
       </div>
-      <div className="w-2/3 text-white h-screen">
+      <div className="w-2/3  text-white fixed mb-6 right-0 top-0 bg-[#131324] h-[92%] overflow-y-scroll ">
         {!currentid ? (
           <Welcome currentuser={nameuser} />
         ) : (
           <>
-            <div className="flex flex-col h-full">
-              <div className="flex-grow">
-                <ChatContainer curr={usern} caht={chat} socket={scrollref} />
+            <div className=" ">
+              <div className=" ">
+                <ChatContainer
+                  curr={usern}
+                  caht={chat}
+                  setchat={setchat}
+                  socket={socket}
+                  userk={currentid}
+                  curref={scrollref}
+                />
               </div>
-              <div className="mb-4   w-full">
+              <div className="mb-2 fixed bottom-0  w-[65%] self-stretch bg-[#131324]">
                 <InpuutChat handlesend={handleSend} />
               </div>
             </div>

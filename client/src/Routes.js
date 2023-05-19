@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Route, Routes } from "react-router-dom";
 import Register from "./pages/Register";
 import Chat from "./pages/Chat";
+import io from "socket.io-client";
+
+const socket = io.connect("http://localhost:4000");
 
 const Routers = () => {
   const [loading, setloading] = useState(true);
@@ -21,8 +24,14 @@ const Routers = () => {
   }, []);
 
   const fetch = useSelector((store) => store.global);
+  useEffect(() => {
+    if (fetch?.id) {
+      socket.emit("add-user", fetch?.id);
+    }
+  }, [fetch?.id]);
+
   if (fetch?.id) {
-    return <Chat />;
+    return <Chat socket={socket} />;
   }
   return <>{!loading && !fetch?.id && <Register />}</>;
 };

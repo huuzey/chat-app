@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { IoMdSend } from "react-icons/io";
+import { v4 as uuidv4 } from "uuid";
 
 const InpuutChat = ({ handlesend }) => {
   const [messege, setmessege] = useState("");
+
   return (
     <div className="flex gap-2 justify-center w-full ">
       <div className="w-full">
@@ -16,7 +18,7 @@ const InpuutChat = ({ handlesend }) => {
       </div>
       <div>
         <button
-          onClick={() => handlesend(messege, setmessege)}
+          onClick={() => handlesend(messege, setmessege, uuidv4())}
           className=" mr-2 ml-1 text-[#71315C] hover:scale-125"
         >
           <IoMdSend />

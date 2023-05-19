@@ -16,6 +16,7 @@
 
 body {
   overflow-x: hidden;
+  background-color: #131324;
 }
 
 @tailwind base;
